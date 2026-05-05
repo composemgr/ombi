@@ -47,8 +47,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/config/ombi` - Data storage
-- `./rootfs/data/ombi` - Data storage
+- `./volumes/config/ombi` - Data storage
+- `./volumes/data/ombi` - Data storage
 
 ## 🔍 Logging
 
