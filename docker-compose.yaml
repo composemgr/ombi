@@ -1,5 +1,6 @@
 # nginx proxy address - http://172.17.0.1:3579
 
+name: ombi
 x-logging: &default-logging
   driver: json-file
   options:
@@ -8,14 +9,15 @@ x-logging: &default-logging
 
 services:
   ombi:
-    image: linuxserver/ombi:latest
+    image: lscr.io/linuxserver/ombi:latest
+    pull_policy: always
     container_name: ombi-app
-    restart: unless-stopped
+    restart: always
     logging: *default-logging
     networks:
       - ombi
     ports:
-      - "3579:3579"
+      - "172.17.0.1:3579:3579"
     environment:
       TZ: ${TZ:-America/New_York}
       PUID: ${SERVICE_USER:-1000}
