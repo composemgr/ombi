@@ -53,6 +53,7 @@ services:
 
 networks:
   ombi:
+    name: ombi
     external: false
   proxy:
     external: true
