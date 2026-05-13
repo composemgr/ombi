@@ -16,12 +16,16 @@ services:
     logging: *default-logging
     networks:
       - ombi
+      - proxy
+      - cloudflare
     ports:
       - "172.17.0.1:3579:3579"
     environment:
       TZ: ${TZ:-America/New_York}
       PUID: ${SERVICE_USER:-1000}
       PGID: ${SERVICE_GROUP:-1000}
+      CONTAINER_NAME: ombi-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
     volumes:
       - ./volumes/config/ombi:/config
       - ./volumes/data/ombi:/data
@@ -30,7 +34,27 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://ombi-app:3579'
+      - 'cloudflare.hostname=ombi.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.ombi-app.entrypoints=http'
+      - 'traefik.http.routers.ombi-app-secure.tls=true'
+      - 'traefik.http.routers.ombi-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.ombi-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.ombi-app.middlewares=ombi-app-https-redirect'
+      - 'traefik.http.routers.ombi-app-secure.entrypoints=https'
+      - 'traefik.http.routers.ombi-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.ombi-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.ombi-app-secure.service=ombi-app'
+      - 'traefik.http.services.ombi-app.loadbalancer.server.port=3579'
 
 networks:
   ombi:
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
